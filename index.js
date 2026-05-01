@@ -14,8 +14,10 @@ const SHEET_URL =
 
 // 🔥 WEBHOOK TELEGRAM
 app.post("/", async (req, res) => {
-  res.sendStatus(200); // wajib
-  console.log("BODY MASUK:", req.body); // 🔥 TAMBAH DI SINI
+  res.sendStatus(200);
+
+  console.log("BODY MASUK:", req.body);
+
   try {
     const message = req.body.message;
     if (!message || !message.text) return;
@@ -88,12 +90,37 @@ Rp ${(data.bersih || 0).toLocaleString()}
       }
     );
 
-    // 🔥 BALASAN KONFIRMASI
+    // =========================
+    // 🤖 REPLY PINTAR
+    // =========================
+
+    let replyText = "";
+
+    // 🔥 jika input "keluar"
+    if (textMsg.includes("keluar")) {
+      const keluarMatch = text.match(/keluar\s*(\d+)/i);
+      const keluar = keluarMatch ? parseInt(keluarMatch[1]) : 0;
+
+      replyText = `💰 Uang keluar: Rp ${keluar.toLocaleString()}`;
+    }
+
+    // 🔥 jika input panen
+    else {
+      const numbers = text.match(/\d+/g);
+      const ton = numbers ? parseInt(numbers[0]) : 0;
+
+      const hargaMatch = text.match(/harga\s*(\d+)/i);
+      const harga = hargaMatch ? parseInt(hargaMatch[1]) : 0;
+
+      replyText = `🌴 Tonase: ${ton} Kg\n💰 Harga: Rp ${harga.toLocaleString()}`;
+    }
+
+    // 🔥 kirim balasan
     await axios.post(
       `https://api.telegram.org/bot${TOKEN}/sendMessage`,
       {
         chat_id: chatId,
-        text: `✅ Data berhasil disimpan, cek laporan?\n\n📥 ${text}`,
+        text: `✅ Data berhasil disimpan\n\n${replyText}`,
       }
     );
 
@@ -107,7 +134,7 @@ app.get("/", (req, res) => {
   res.send("BOT AKTIF TAQIN 🚀");
 });
 
-// 🔥 PORT RAILWAY
+// 🔥 PORT
 const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, "0.0.0.0", () => {
