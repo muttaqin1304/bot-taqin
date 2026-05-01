@@ -3,6 +3,7 @@ const axios = require("axios");
 
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // 🔐 ambil token dari Railway
 const TOKEN = process.env.TOKEN;
@@ -14,7 +15,7 @@ const SHEET_URL =
 // 🔥 WEBHOOK TELEGRAM
 app.post("/", async (req, res) => {
   res.sendStatus(200); // wajib
-
+  console.log("BODY MASUK:", req.body); // 🔥 TAMBAH DI SINI
   try {
     const message = req.body.message;
     if (!message || !message.text) return;
@@ -92,7 +93,7 @@ Rp ${(data.bersih || 0).toLocaleString()}
       `https://api.telegram.org/bot${TOKEN}/sendMessage`,
       {
         chat_id: chatId,
-        text: `✅ Data berhasil disimpan\n\n📥 ${text}`,
+        text: `✅ Data berhasil disimpan, cek laporan?\n\n📥 ${text}`,
       }
     );
 
