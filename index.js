@@ -193,7 +193,25 @@ Rp ${(data.bersih || 0).toLocaleString()}
     // ========================================
     // 📥 MODE INPUT DATA
     // ========================================
+    if (!textMsg.includes("harga")) {
 
+  await axios.post(
+    `https://api.telegram.org/bot${TOKEN}/sendMessage`,
+    {
+      chat_id: chatId,
+
+      text:
+      `❌ Format tidak dikenali
+      Gunakan tombol menu di bawah 👇`,
+
+      reply_markup: keyboardMenu
+
+    }
+  );
+
+  return;
+}
+    
     const gasResponse = await axios.post(
       SHEET_URL,
       new URLSearchParams({
