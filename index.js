@@ -99,10 +99,20 @@ Rp ${(data.bersih || 0).toLocaleString()}
           `https://api.telegram.org/bot${TOKEN}/sendMessage`,
           {
             chat_id: chatId,
-            text: reply,
+            text: replyText,
             parse_mode: "Markdown",
-          }
-        );
+            reply_markup: {
+      keyboard: [
+        ["🌴 Input Panen"],
+        ["📊 Laporan Hari Ini", "📅 Laporan Bulanan"],
+        ["💵 Kas Keluar", "👷 Data Pekerja"],
+        ["⚙️ Setting"]
+      ],
+      resize_keyboard: true
+    }
+
+  }
+);
 
       } catch (err) {
 
