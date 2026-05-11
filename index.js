@@ -34,6 +34,77 @@ app.post("/", async (req, res) => {
     const textMsg = text.toLowerCase();
 
     console.log("PESAN MASUK:", text);
+   if (textMsg === "🌴 input panen") {
+
+  await axios.post(
+    `https://api.telegram.org/bot${TOKEN}/sendMessage`,
+    {
+      chat_id: chatId,
+
+      text:
+`🌴 FORMAT INPUT PANEN
+
+contoh:
+
+6700 harga 4000 penolong 450000 bonus 100000`,
+
+      reply_markup: {
+        keyboard: [
+          ["🌴 Input Panen"],
+          ["📊 Laporan Hari Ini"],
+          ["📅 Laporan Bulanan"]
+        ],
+        resize_keyboard: true
+      }
+
+    }
+  );
+
+  return;
+}
+// ========================================
+// 📊 MENU LAPORAN HARI INI
+// ========================================
+
+if (
+  textMsg === "📊 laporan hari ini"
+) {
+
+  textMsg = "laporan";
+}
+
+// ========================================
+// 📅 MENU LAPORAN BULANAN
+// ========================================
+
+if (
+  textMsg === "📅 laporan bulanan"
+) {
+
+  await axios.post(
+    `https://api.telegram.org/bot${TOKEN}/sendMessage`,
+    {
+      chat_id: chatId,
+
+      text:
+`📅 LAPORAN BULANAN
+
+fitur masih dalam pengembangan 🔥`,
+
+      reply_markup: {
+        keyboard: [
+          ["🌴 Input Panen"],
+          ["📊 Laporan Hari Ini"],
+          ["📅 Laporan Bulanan"]
+        ],
+        resize_keyboard: true
+      }
+
+    }
+  );
+
+  return;
+}
 
     // ========================================
     // 📊 MODE LAPORAN
@@ -101,12 +172,11 @@ Rp ${(data.bersih || 0).toLocaleString()}
             chat_id: chatId,
             text: replyText,
             parse_mode: "Markdown",
+            
             reply_markup: {
       keyboard: [
         ["🌴 Input Panen"],
         ["📊 Laporan Hari Ini", "📅 Laporan Bulanan"],
-        ["💵 Kas Keluar", "👷 Data Pekerja"],
-        ["⚙️ Setting"]
       ],
       resize_keyboard: true
     }
