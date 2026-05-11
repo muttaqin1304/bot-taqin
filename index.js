@@ -2,141 +2,233 @@ const express = require("express");
 const axios = require("axios");
 
 const app = express();
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 🔐 ambil token dari Railway
+// 🔐 TOKEN TELEGRAM
 const TOKEN = process.env.TOKEN;
 
-// 🔗 URL GOOGLE SCRIPT
+// 🔗 GOOGLE APPS SCRIPT
 const SHEET_URL =
-  "https://script.google.com/macros/s/AKfycbxCWxliZcJ3hUzFxBrJQ3GQSZp_S7Fh0Hecv4TTXL_A7Sb9qwdZ2mKMTeuMExF5Tgd6/exec";
+"https://script.google.com/macros/s/AKfycbxCWxliZcJ3hUzFxBrJQ3GQSZp_S7Fh0Hecv4TTXL_A7Sb9qwdZ2mKMTeuMExF5Tgd6/exec";
 
-// 🔥 WEBHOOK TELEGRAM
+// ========================================
+// 🚀 WEBHOOK TELEGRAM
+// ========================================
+
 app.post("/", async (req, res) => {
-  res.sendStatus(200);
 
-  console.log("BODY MASUK:", req.body);
+res.sendStatus(200);
+
+try {
+
+```
+const message = req.body.message;
+
+if (!message || !message.text) return;
+
+const chatId = message.chat.id;
+
+const text = message.text;
+
+const textMsg = text.toLowerCase();
+
+console.log("PESAN MASUK:", text);
+
+// ========================================
+// 📊 MODE LAPORAN
+// ========================================
+
+if (textMsg === "laporan") {
 
   try {
-    const message = req.body.message;
-    if (!message || !message.text) return;
 
-    const chatId = message.chat.id;
-    const textMsg = message.text.toLowerCase();
-    const text = message.text;
+    const response = await axios.get(SHEET_URL);
 
-    console.log("Pesan masuk:", text);
+    const data = response.data;
 
-    // =========================
-    // 📊 MODE LAPORAN
-    // =========================
-    if (textMsg === "laporan") {
-      try {
-        const response = await axios.get(SHEET_URL);
-        const data = response.data;
+    // 🔥 HITUNG UPAH PER ORANG
+    const perOrang =
+      Math.floor((data.upah || 0) / 4);
 
-        const reply = `
+    // 🔥 TOTAL PENGELUARAN
+    const totalPengeluaran =
+      (data.upah || 0) +
+      (data.penolong || 0) +
+      (data.langsir || 0) +
+      (data.zakat || 0);
+
+    const reply = `
+```
+
 📊 *LAPORAN PANEN MUTTAQIN*
 
 📅 ${data.tanggal}
 
 ━━━━━━━━━━━━━━━
-🌴 *Total Panen*  
-${data.ton || 0} Kg
+
+🌴 *Total Panen*
+${(data.ton || 0).toLocaleString()} Kg
 
 👷 *Upah Panen*
 Rp ${(data.upah || 0).toLocaleString()}
+(Rp ${perOrang.toLocaleString()}/orang)
+
+🤝 *Penolong*
+Rp ${(data.penolong || 0).toLocaleString()}
+
+🎁 *Bonus*
+Rp ${(data.bonus || 0).toLocaleString()}
 
 🚚 *Upah Langsir*
 Rp ${(data.langsir || 0).toLocaleString()}
 
-🕌 *Zakat (2.5%)*  
+🕌 *Zakat (2.5%)*
 Rp ${(data.zakat || 0).toLocaleString()}
 
-📦 *Hasil Bersih*  
+💸 *Total Pengeluaran*
+Rp ${totalPengeluaran.toLocaleString()}
+
+━━━━━━━━━━━━━━━
+
+📦 *Hasil Bersih*
 Rp ${(data.bersih || 0).toLocaleString()}
+
 ━━━━━━━━━━━━━━━
 `;
 
-        await axios.post(
-          `https://api.telegram.org/bot${TOKEN}/sendMessage`,
-          {
-            chat_id: chatId,
-            text: reply,
-            parse_mode: "Markdown",
-          }
-        );
-      } catch (err) {
-        console.log("ERROR LAPORAN:", err);
-      }
-
-      return;
-    }
-
-    // =========================
-    // 📥 MODE INPUT DATA
-    // =========================
-
-    await axios.post(
-      SHEET_URL,
-      new URLSearchParams({
-        text: text,
-      }),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
-
-    // =========================
-    // 🤖 REPLY PINTAR
-    // =========================
-
-    let replyText = "";
-
-    // 🔥 jika input "keluar"
-    if (textMsg.includes("keluar")) {
-      const keluarMatch = text.match(/keluar\s*(\d+)/i);
-      const keluar = keluarMatch ? parseInt(keluarMatch[1]) : 0;
-
-      replyText = `💰 Uang keluar: Rp ${keluar.toLocaleString()}`;
-    }
-
-    // 🔥 jika input panen
-    else {
-      const numbers = text.match(/\d+/g);
-      const ton = numbers ? parseInt(numbers[0]) : 0;
-
-      const hargaMatch = text.match(/harga\s*(\d+)/i);
-      const harga = hargaMatch ? parseInt(hargaMatch[1]) : 0;
-
-      replyText = `🌴 Tonase: ${ton} Kg\n💰 Harga: Rp ${harga.toLocaleString()}`;
-    }
-
-    // 🔥 kirim balasan
+```
     await axios.post(
       `https://api.telegram.org/bot${TOKEN}/sendMessage`,
       {
         chat_id: chatId,
-        text: `✅ Data berhasil disimpan\n\n${replyText}`,
+        text: reply,
+        parse_mode: "Markdown",
       }
     );
 
   } catch (err) {
-    console.log("ERROR:", err);
+
+    console.log("ERROR LAPORAN:", err);
+
+    await axios.post(
+      `https://api.telegram.org/bot${TOKEN}/sendMessage`,
+      {
+        chat_id: chatId,
+        text: "❌ Gagal mengambil laporan",
+      }
+    );
   }
+
+  return;
+}
+
+// ========================================
+// 📥 MODE INPUT DATA
+// ========================================
+
+const gasResponse = await axios.post(
+  SHEET_URL,
+  new URLSearchParams({
+    text: text,
+  }),
+  {
+    headers: {
+      "Content-Type":
+        "application/x-www-form-urlencoded",
+    },
+  }
+);
+
+console.log("RESPON GAS:", gasResponse.data);
+
+// ========================================
+// 🔥 AMBIL DATA INPUT
+// ========================================
+
+const numbers = text.match(/\d+/g);
+
+const ton =
+  numbers ? parseInt(numbers[0]) : 0;
+
+const hargaMatch =
+  text.match(/harga\s*(\d+)/i);
+
+const harga =
+  hargaMatch
+    ? parseInt(hargaMatch[1])
+    : 0;
+
+const penolongMatch =
+  text.match(/penolong\s*(\d+)/i);
+
+const penolong =
+  penolongMatch
+    ? parseInt(penolongMatch[1])
+    : 0;
+
+const bonusMatch =
+  text.match(/bonus\s*(\d+)/i);
+
+const bonus =
+  bonusMatch
+    ? parseInt(bonusMatch[1])
+    : 0;
+
+// ========================================
+// 🤖 BALASAN BOT
+// ========================================
+
+const replyText = `
+```
+
+✅ *Data berhasil disimpan*
+
+🌴 Tonase: ${ton.toLocaleString()} Kg
+💰 Harga: Rp ${harga.toLocaleString()}
+🤝 Penolong: Rp ${penolong.toLocaleString()}
+🎁 Bonus: Rp ${bonus.toLocaleString()}
+`;
+
+```
+await axios.post(
+  `https://api.telegram.org/bot${TOKEN}/sendMessage`,
+  {
+    chat_id: chatId,
+    text: replyText,
+    parse_mode: "Markdown",
+  }
+);
+```
+
+} catch (err) {
+
+```
+console.log("ERROR:", err);
+```
+
+}
 });
 
+// ========================================
 // 🔥 TEST SERVER
+// ========================================
+
 app.get("/", (req, res) => {
-  res.send("BOT AKTIF TAQIN 🚀");
+
+res.send("BOT AKTIF TAQIN 🚀");
+
 });
 
-// 🔥 PORT
+// ========================================
+// 🚀 JALANKAN SERVER
+// ========================================
+
 const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log("Server jalan di port " + PORT);
+
+console.log("Server jalan di port " + PORT);
+
 });
