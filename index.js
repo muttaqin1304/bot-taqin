@@ -14,6 +14,18 @@ const SHEET_URL =
   "https://script.google.com/macros/s/AKfycbxCWxliZcJ3hUzFxBrJQ3GQSZp_S7Fh0Hecv4TTXL_A7Sb9qwdZ2mKMTeuMExF5Tgd6/exec";
 
 // ========================================
+// 🎛️ KEYBOARD MENU
+// ========================================
+
+const keyboardMenu = {
+  keyboard: [
+    ["🌴 Input Panen"],
+    ["📊 Laporan Hari Ini", "📅 Laporan Bulanan"]
+  ],
+  resize_keyboard: true
+};
+
+// ========================================
 // 🚀 WEBHOOK TELEGRAM
 // ========================================
 
@@ -29,82 +41,67 @@ app.post("/", async (req, res) => {
 
     const chatId = message.chat.id;
 
+    let textMsg = message.text.toLowerCase();
+
     const text = message.text;
 
-    const textMsg = text.toLowerCase();
-
     console.log("PESAN MASUK:", text);
-   if (textMsg === "🌴 input panen") {
 
-  await axios.post(
-    `https://api.telegram.org/bot${TOKEN}/sendMessage`,
-    {
-      chat_id: chatId,
+    // ========================================
+    // 🌴 MENU INPUT PANEN
+    // ========================================
 
-      text:
+    if (textMsg === "🌴 input panen") {
+
+      await axios.post(
+        `https://api.telegram.org/bot${TOKEN}/sendMessage`,
+        {
+          chat_id: chatId,
+
+          text:
 `🌴 FORMAT INPUT PANEN
 
 contoh:
 
 6700 harga 4000 penolong 450000 bonus 100000`,
 
-      reply_markup: {
-        keyboard: [
-          ["🌴 Input Panen"],
-          ["📊 Laporan Hari Ini"],
-          ["📅 Laporan Bulanan"]
-        ],
-        resize_keyboard: true
-      }
+          reply_markup: keyboardMenu
+        }
+      );
 
+      return;
     }
-  );
 
-  return;
-}
-// ========================================
-// 📊 MENU LAPORAN HARI INI
-// ========================================
+    // ========================================
+    // 📊 MENU LAPORAN HARI INI
+    // ========================================
 
-if (
-  textMsg === "📊 laporan hari ini"
-) {
+    if (textMsg === "📊 laporan hari ini") {
+      textMsg = "laporan";
+    }
 
-  textMsg = "laporan";
-}
+    // ========================================
+    // 📅 MENU LAPORAN BULANAN
+    // ========================================
 
-// ========================================
-// 📅 MENU LAPORAN BULANAN
-// ========================================
+    if (textMsg === "📅 laporan bulanan") {
 
-if (
-  textMsg === "📅 laporan bulanan"
-) {
+      await axios.post(
+        `https://api.telegram.org/bot${TOKEN}/sendMessage`,
+        {
+          chat_id: chatId,
 
-  await axios.post(
-    `https://api.telegram.org/bot${TOKEN}/sendMessage`,
-    {
-      chat_id: chatId,
-
-      text:
+          text:
 `📅 LAPORAN BULANAN
 
 fitur masih dalam pengembangan 🔥`,
 
-      reply_markup: {
-        keyboard: [
-          ["🌴 Input Panen"],
-          ["📊 Laporan Hari Ini"],
-          ["📅 Laporan Bulanan"]
-        ],
-        resize_keyboard: true
-      }
+          reply_markup: keyboardMenu
+        }
+      );
 
+      return;
     }
-  );
-
-  return;
-}
 
     // ========================================
     // 📊 MODE LAPORAN
@@ -170,19 +167,11 @@ Rp ${(data.bersih || 0).toLocaleString()}
           `https://api.telegram.org/bot${TOKEN}/sendMessage`,
           {
             chat_id: chatId,
-            text: replyText,
+            text: reply,
             parse_mode: "Markdown",
-            
-            reply_markup: {
-      keyboard: [
-        ["🌴 Input Panen"],
-        ["📊 Laporan Hari Ini", "📅 Laporan Bulanan"],
-      ],
-      resize_keyboard: true
-    }
-
-  }
-);
+            reply_markup: keyboardMenu
+          }
+        );
 
       } catch (err) {
 
@@ -193,6 +182,7 @@ Rp ${(data.bersih || 0).toLocaleString()}
           {
             chat_id: chatId,
             text: "❌ Gagal mengambil laporan",
+            reply_markup: keyboardMenu
           }
         );
       }
@@ -271,6 +261,7 @@ Rp ${(data.bersih || 0).toLocaleString()}
         chat_id: chatId,
         text: replyText,
         parse_mode: "Markdown",
+        reply_markup: keyboardMenu
       }
     );
 
