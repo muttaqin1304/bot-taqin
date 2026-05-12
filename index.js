@@ -63,7 +63,7 @@ app.post("/", async (req, res) => {
 
 contoh:
 
-6700 harga 4000 penolong 450000 bonus 100000`,
+tonase harga xxxx penolong 450000`,
 
           reply_markup: keyboardMenu
         }
@@ -366,7 +366,7 @@ Rp ${perOrangAsli.toLocaleString()}
 💡 Silakan tentukan pembagian:
 
 contoh:
-anggota 430 ketua 450
+anggota berapa ketua berapa
 `;
 
     await axios.post(
