@@ -144,6 +144,19 @@ fitur masih dalam pengembangan 🔥`,
       // bonus final
       const bonusFinal =
         totalPembagian - upahDasar;
+      // kirim bonus ke GAS
+        await axios.post(
+          SHEET_URL,
+          new URLSearchParams({
+            bonus: bonusFinal
+          }),
+          {
+            headers: {
+              "Content-Type":
+                "application/x-www-form-urlencoded",
+            },
+          }
+        );
 
       // simpan sementara
       global.bonusData = {
@@ -205,21 +218,14 @@ ${(data.ton || 0).toLocaleString()} Kg
 👷 *Upah Dasar*
 Rp ${upahDasar.toLocaleString()}
 
-👤 *Upah Per Orang*
+👤 *Per Orang*
 Rp ${perOrang.toLocaleString()}
 
-━━━━━━━━━━━━━━━
-
-👑 *Ketua*
-Rp ${(global.bonusData?.ketua || 0).toLocaleString()}
-
-👷 *Anggota*
-Rp ${(global.bonusData?.anggota || 0).toLocaleString()} x3
+👑 Ketua: Rp ${(global.bonusData?.ketua || 0).toLocaleString()}
+👷 Anggota: Rp ${(global.bonusData?.anggota || 0).toLocaleString()} x3
 
 🎁 *Bonus Final*
 Rp ${(global.bonusData?.bonusFinal || 0).toLocaleString()}
-
-━━━━━━━━━━━━━━━
 
 🤝 *Penolong*
 Rp ${(data.penolong || 0).toLocaleString()}
