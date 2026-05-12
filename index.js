@@ -259,6 +259,29 @@ Rp ${(data.bersih || 0).toLocaleString()}
       bonusMatch
         ? parseInt(bonusMatch[1])
         : 0;
+    // ========================================
+// 🔥 HITUNG UPAH & SARAN BONUS
+// ========================================
+
+// upah dasar tanpa bonus
+const upahDasar = ton * 260;
+
+// dibagi 4 pemanen
+const perOrangAsli =
+  upahDasar / 4;
+
+// pembulatan otomatis ke 50rb terdekat
+const saranPerOrang =
+  Math.ceil(perOrangAsli / 50000) * 50000;
+
+// total setelah dibulatkan
+const totalSetelahPembulatan =
+  saranPerOrang * 4;
+
+// bonus otomatis
+const bonusOtomatis =
+  totalSetelahPembulatan - upahDasar;
+
 
     // ========================================
     // 🤖 BALASAN BOT
@@ -267,10 +290,23 @@ Rp ${(data.bersih || 0).toLocaleString()}
     const replyText = `
 ✅ *Data berhasil disimpan*
 
-🌴 Tonase: ${ton.toLocaleString()} Kg
-💰 Harga: Rp ${harga.toLocaleString()}
-🤝 Penolong: Rp ${penolong.toLocaleString()}
-🎁 Bonus: Rp ${bonus.toLocaleString()}
+🌴 Tonase
+${ton.toLocaleString()} Kg
+
+💰 Harga
+Rp ${harga.toLocaleString()}
+
+👷 Upah Dasar
+Rp ${upahDasar.toLocaleString()}
+
+👤 Upah Per Orang
+Rp ${Math.floor(perOrangAsli).toLocaleString()}
+
+💡 Saran Pembulatan
+Rp ${saranPerOrang.toLocaleString()}/orang
+
+🎁 Bonus Dibutuhkan
+Rp ${bonusOtomatis.toLocaleString()}
 `;
 
     await axios.post(
