@@ -104,6 +104,71 @@ fitur masih dalam pengembangan 🔥`,
     }
 
     // ========================================
+// 👷 MODE PEMBAGIAN BONUS
+// ========================================
+
+if (
+  textMsg.includes("anggota") &&
+  textMsg.includes("ketua")
+) {
+
+  const anggotaMatch =
+    text.match(/anggota\s*(\d+)/i);
+
+  const ketuaMatch =
+    text.match(/ketua\s*(\d+)/i);
+
+  const anggota =
+    anggotaMatch
+      ? parseInt(anggotaMatch[1]) * 1000
+      : 0;
+
+  const ketua =
+    ketuaMatch
+      ? parseInt(ketuaMatch[1]) * 1000
+      : 0;
+
+  // ambil laporan terakhir
+  const response =
+    await axios.get(SHEET_URL);
+
+  const data = response.data;
+
+  const upahDasar =
+    (data.ton || 0) * 260;
+
+  // total pembagian
+  const totalPembagian =
+    (anggota * 3) + ketua;
+
+  // bonus final
+  const bonusFinal =
+    totalPembagian - upahDasar;
+  // simpan sementara
+global.bonusData = {
+  ketua,
+  anggota,
+  bonusFinal
+};
+
+ const replyBonus = `
+✅ Bonus berhasil disimpan
+`;
+
+  await axios.post(
+    `https://api.telegram.org/bot${TOKEN}/sendMessage`,
+    {
+      chat_id: chatId,
+      text: replyBonus,
+      parse_mode: "Markdown",
+      reply_markup: keyboardMenu
+    }
+  );
+
+  return;
+}
+    
+    // ========================================
     // 📊 MODE LAPORAN
     // ========================================
 
@@ -136,15 +201,17 @@ fitur masih dalam pengembangan 🔥`,
 🌴 *Total Panen*
 ${(data.ton || 0).toLocaleString()} Kg
 
-👷 *Upah Panen*
-Rp ${(data.upah || 0).toLocaleString()}
-(Rp ${perOrang.toLocaleString()}/orang)
+👷 *Upah Dasar*
+Rp ${((data.ton || 0) * 260).toLocaleString()} 
+*Upah Per Orang* Rp ${perOrang.toLocaleString()}
+
+🎁 *Bonus*
+👑 *Ketua* Rp ${(global.bonusData?.ketua || 0).toLocaleString()} 👷 *Anggota*Rp ${(global.bonusData?.anggota || 0).toLocaleString()} x3
+🎁 *Bonus Final*
+Rp ${(global.bonusData?.bonusFinal || 0).toLocaleString()}
 
 🤝 *Penolong*
 Rp ${(data.penolong || 0).toLocaleString()}
-
-🎁 *Bonus*
-Rp ${(data.bonus || 0).toLocaleString()}
 
 🚚 *Upah Langsir*
 Rp ${(data.langsir || 0).toLocaleString()}
@@ -263,31 +330,30 @@ Rp ${(data.bersih || 0).toLocaleString()}
 // 🔥 HITUNG UPAH & SARAN BONUS
 // ========================================
 
-// upah dasar tanpa bonus
-const upahDasar = ton * 260;
-
-// dibagi 4 pemanen
-const perOrangAsli =
-  upahDasar / 4;
-
-// pembulatan otomatis ke 50rb terdekat
-const saranPerOrang =
+// anggota dibulatkan ke atas
+const upahAnggota =
   Math.ceil(perOrangAsli / 50000) * 50000;
 
-// total setelah dibulatkan
-const totalSetelahPembulatan =
-  saranPerOrang * 4;
+// tambahan khusus ketua
+const tambahanKetua = 30000;
+
+// upah ketua
+const upahKetua =
+  upahAnggota + tambahanKetua;
+
+// total pembagian
+const totalPembagian =
+  upahKetua + (upahAnggota * 3);
 
 // bonus otomatis
 const bonusOtomatis =
-  totalSetelahPembulatan - upahDasar;
-
+  totalPembagian - upahDasar;
 
     // ========================================
     // 🤖 BALASAN BOT
     // ========================================
 
-    const replyText = `
+const replyText = `
 ✅ *Data berhasil disimpan*
 
 🌴 Tonase
@@ -299,14 +365,13 @@ Rp ${harga.toLocaleString()}
 👷 Upah Dasar
 Rp ${upahDasar.toLocaleString()}
 
-👤 Upah Per Orang
+👤 Per Orang Asli
 Rp ${Math.floor(perOrangAsli).toLocaleString()}
 
-💡 Saran Pembulatan
-Rp ${saranPerOrang.toLocaleString()}/orang
+💡 Silakan tentukan pembagian:
 
-🎁 Bonus Dibutuhkan
-Rp ${bonusOtomatis.toLocaleString()}
+contoh:
+anggota 430 ketua 450
 `;
 
     await axios.post(
