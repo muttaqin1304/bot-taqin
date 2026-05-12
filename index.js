@@ -207,9 +207,7 @@ fitur masih dalam pengembangan 🔥`,
 
         const reply = `
 📊 *LAPORAN PANEN MUTTAQIN*
-
 📅 ${data.tanggal}
-
 ━━━━━━━━━━━━━━━
 
 🌴 *Total Panen*
@@ -220,14 +218,13 @@ Rp ${upahDasar.toLocaleString()}
 
 👤 *Per Orang*
 Rp ${perOrang.toLocaleString()}
+👑 Ketua + Bonus: Rp ${(global.bonusData?.ketua || 0).toLocaleString()}
+👷 Anggota + Bonus: Rp ${(global.bonusData?.anggota || 0).toLocaleString()} x3
 
-👑 Ketua: Rp ${(global.bonusData?.ketua || 0).toLocaleString()}
-👷 Anggota: Rp ${(global.bonusData?.anggota || 0).toLocaleString()} x3
-
-🎁 *Bonus Final*
+🎁 *Total Bonus*
 Rp ${(global.bonusData?.bonusFinal || 0).toLocaleString()}
 
-🤝 *Penolong*
+🤝 *Penolong Panen*
 Rp ${(data.penolong || 0).toLocaleString()}
 
 🚚 *Upah Langsir*
